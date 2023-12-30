@@ -7,12 +7,13 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Patch,
+  Delete,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ReadUserDto } from './dto/read-user.dto';
-import { DeleteUserDto } from './dto/delete-user-dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
@@ -40,16 +41,16 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.CREATED)
-  @Post(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Post('delete/:id')
-  remove(@Param('id') id: string, @Body() deleteUserDto: DeleteUserDto) {
-    return this.usersService.remove(+id, deleteUserDto);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(+id);
   }
 }

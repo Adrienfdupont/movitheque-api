@@ -6,7 +6,6 @@ import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ReadUserDto } from './dto/read-user.dto';
-import { DeleteUserDto } from './dto/delete-user-dto';
 
 @Injectable()
 export class UsersService {
@@ -59,11 +58,8 @@ export class UsersService {
     await this.userRepository.save(user);
   }
 
-  async remove(id: number, deleteUserDto: DeleteUserDto) {
+  async remove(id: number) {
     const user = await this.userRepository.findOneBy({ id: id });
-    if (!(await bcrypt.compare(deleteUserDto.password, user.password))) {
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    }
-    await this.userRepository.delete(user);
+    await this.userRepository.remove(user);
   }
 }
