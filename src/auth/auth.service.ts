@@ -12,7 +12,7 @@ export class AuthService {
 
   async signIn(username, password) {
     const user = await this.usersService.findOneByName(username);
-    if (!(await bcrypt.compare(password, user.password))) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException();
     }
     const payload = { sub: user.id, username: user.username };

@@ -1,6 +1,5 @@
 export class UpdateUserDto {
-  id: number;
-  username: string;
-  password: string;
-  oldPassword: string;
+  username?: string;
+  password?: string;
+  newPassword: string;
 }

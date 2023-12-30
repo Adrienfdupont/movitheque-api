@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -43,17 +43,27 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepository.findOneBy({ id: updateUserDto.id });
-    if (await bcrypt.compare(updateUserDto.oldPassword, user.password)) {
-      user.username = updateUserDto.username;
-      await this.userRepository.save(user);
+    const user = await this.userRepository.findOneBy({ id: id });
+    if (!(await bcrypt.compare(updateUserDto.password, user.password))) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
+    user.username = updateUserDto.username
+      ? updateUserDto.username
+      : user.username;
+    if (
+      updateUserDto.newPassword &&
+      !(await bcrypt.compare(updateUserDto.newPassword, user.password))
+    ) {
+      user.password = await bcrypt.hash(updateUserDto.newPassword, 10);
+    }
+    await this.userRepository.save(user);
   }
 
-  async remove(deleteUserDto: DeleteUserDto) {
-    const user = await this.userRepository.findOneBy({ id: deleteUserDto.id });
-    if (await bcrypt.compare(deleteUserDto.password, user.password)) {
-      await this.userRepository.delete(user);
+  async remove(id: number, deleteUserDto: DeleteUserDto) {
+    const user = await this.userRepository.findOneBy({ id: id });
+    if (!(await bcrypt.compare(deleteUserDto.password, user.password))) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
+    await this.userRepository.delete(user);
   }
 }
